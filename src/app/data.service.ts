@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import {Layout, LayoutCapacity, Room} from "./model/Room";
+import {User} from "./model/User";
+import {Observable, of} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -7,7 +9,34 @@ import {Layout, LayoutCapacity, Room} from "./model/Room";
 
 export class DataService {
 
-  rooms: Array<Room>;
+  private rooms: Array<Room>;
+  private users: Array<User>;
+
+  getRooms() : Observable<Array<Room>> {
+    return of(this.rooms);
+  }
+
+  getUsers(): Observable<Array<User>> {
+    return of(this.users);
+  }
+
+  updateUser(user: User) : Observable<User> {
+    const originalUser = this.users.find(u => u.id === user.id);
+    originalUser.name = user.name;
+    return of(originalUser);
+  }
+
+  addUser(newUser: User, password: string) : Observable<User> {
+    let id = 0;
+    for (const user of this.users) {
+      if (user.id > id) {
+        id = user.id;
+      }
+    }
+    newUser.id = id + 1;
+    this.users.push(newUser);
+    return of(newUser);
+  }
 
   constructor() {
     this.rooms = new Array<Room>();
@@ -40,5 +69,21 @@ export class DataService {
 
     this.rooms.push(room1);
     this.rooms.push(room2);
+
+    this.users = new Array<User>();
+
+    const user1 = new User();
+    user1.id = 1;
+    user1.name = 'Matt';
+    const user2 = new User();
+    user2.id = 2;
+    user2.name = 'Diana';
+    const user3 = new User();
+    user3.id = 3;
+    user3.name = 'Suzanne';
+    this.users.push(user1);
+    this.users.push(user2);
+    this.users.push(user3);
+
   }
 }

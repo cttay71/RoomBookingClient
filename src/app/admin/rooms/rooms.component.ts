@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {DataService} from "../../data.service";
 import {Room} from "../../model/Room";
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
   selector: 'app-rooms',
@@ -10,11 +11,40 @@ import {Room} from "../../model/Room";
 export class RoomsComponent implements OnInit {
 
   rooms: Array<Room>;
+  selectedRoom: Room;
+  action: string;
 
-  constructor(private dataService: DataService) { }
+  constructor(private dataService: DataService,
+              private route: ActivatedRoute,
+              private router: Router) {
+  }
 
   ngOnInit() {
-    this.rooms = this.dataService.rooms;
+    this.dataService.getRooms().subscribe(
+      (next) => {
+        this.rooms = next;
+      }
+    );
+    this.route.queryParams.subscribe(
+      (params) => {
+        const id = params['id'];
+        if (id){
+          this.selectedRoom = this.rooms.find( room => room.id === +id);
+          this.action = params['action'];
+        }
+        if (params['action'] === 'add') {
+          this.selectedRoom = new Room();
+          this.action = 'edit';
+        }
+      }
+    )
+  }
+
+  setRoom(id: number) {
+    this.router.navigate(['admin','rooms'], {queryParams : {id, action : 'view'} });
+  }
+  addRoom() {
+    this.router.navigate(['admin','rooms'], {queryParams : {action : 'add'} });
   }
 
 }
